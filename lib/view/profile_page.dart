@@ -13,6 +13,8 @@ import 'login_page.dart';
 
 String? url;
 
+enum Status { LOADED, COMPLETED }
+
 class ProfilrPage extends StatefulWidget {
   String userName;
   String email;
@@ -239,7 +241,16 @@ class _ProfilrPageState extends State<ProfilrPage> {
                     pickImage(ImageSource.camera).whenComplete(() {
                       DatabaseService(
                               uid: FirebaseAuth.instance.currentUser!.uid)
-                          .updateProfile(image!);
+                          .updateProfile(image!)
+                          .whenComplete(() async {
+                        QuerySnapshot snapshot = await DatabaseService(
+                                uid: FirebaseAuth.instance.currentUser!.uid)
+                            .gettingUserData(widget.email);
+                        setState(() {
+                          url = snapshot.docs[0]['profilePic'];
+                          HelpingFunctions.saveProfileImage(url!);
+                        });
+                      });
                     });
                   },
                   icon: Icon(
